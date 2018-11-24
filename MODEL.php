@@ -8,6 +8,7 @@ $maximum     = 10001;
 $tally       = 0;
 $solution    = ['first' => 0, 'second' => 0, 'product' => 0];
 $final_prime = 1;
+$need_help   = false;
 
 // HELP:
 if ($argc > 1) {
@@ -26,13 +27,7 @@ if ($argc > 1) {
 
             case 'h':
             default:
-                echo 'HELP: ' . basename(__FILE__) . ' -d -h -m $max' . PHP_EOL;
-                echo 'GOAL: To solve this puzzle at projecteuler.net' . PHP_EOL;
-                echo 'PARM: -d indicates we are debugging' . PHP_EOL;
-                echo '      -h redisplays this Help Screen' . PHP_EOL;
-                echo '      -m sets the $max number of primes to identify.' . PHP_EOL;
-                echo 'NOTE: This finds the 10001st Prime Number' . PHP_EOL;
-                exit(0);
+                $need_help = true;
                 break;
         }
     }
@@ -65,6 +60,16 @@ function is_prime($val = 1) {
 }
 
 //////////////////////////////////   MAIN   //////////////////////////////////
+if ($need_help) {
+    echo 'HELP: ' . basename(__FILE__) . ' -d -h -m $max' . PHP_EOL;
+    echo 'GOAL: To solve this puzzle at projecteuler.net' . PHP_EOL;
+    echo 'PARM: -d indicates we are debugging' . PHP_EOL;
+    echo '      -h redisplays this Help Screen' . PHP_EOL;
+    echo '      -m sets the $max number of primes to identify.' . PHP_EOL;
+    echo 'NOTE: This finds the 10001st Prime Number' . PHP_EOL;
+    exit(0);
+}
+
 echo PHP_EOL;
 $first     = 1;
 $to_check  = 5;

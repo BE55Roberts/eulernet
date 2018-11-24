@@ -168,6 +168,6 @@ echo 'DISTINCE_POWERS['.$first_to_check.', '.$maximum.'] = '.count($distinct_arr
 # Evaluate timing
 $finished = microtime(true);
 $elapsed = $finished - $starting;
-echo 'TIMING: This job took '.$elapsed.' seconds to run'.$tally.' iterations.'.PHP_EOL;
+echo 'TIMING: This job took '.$elapsed.' seconds to run '.$tally.' iterations.'.PHP_EOL;
 exit(0);
 
