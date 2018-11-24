@@ -1,24 +1,32 @@
 <?php
-// FILE: trial39.php
+// FILE: trial40.php
 // GOAL: To solve this puzzle
 
 /*
-If p is the perimeter of a right angle triangle with integral length sides, {a,b,c},
-there are exactly three solutions for p = 120.
+ * URL: https://projecteuler.net/problem=40
+ *
+ * An irrational decimal fraction is created by concatenating the positive integers [as a decimal faction]:
 
-{20,48,52}, {24,45,51}, {30,40,50}
+0.123456789101112131415161718192021...
+-------------^
+It can be seen that the 12th digit of the fractional part is 1.
 
-For which value of p ≤ 1000, is the number of solutions maximised?
+If dn represents the nth digit of the fractional part, find the value of the following expression.
 
-NOTE: Pythagorean theorem holds: c^2 = a^2 + b^2
-ALSO: p = a + b + c AND p <= 1000
-Solution:
-  When p = 840, there are 16 tuples.
+d1 × d10 × d100 × d1000 × d10000 × d100000 × d1000000
+
+Wikipedia Definition: Champernowne's constant
+URL: https://en.wikipedia.org/wiki/Champernowne_constant
+For base 10, the number is defined by concatenating representations of successive integers together:
+
+C10 = 0.12345678910111213141516…  (sequence A033307 in the OEIS).
+Solution is:
+
 */
 
 // START
 $dbg          = FALSE;
-$maximum      = 1000;
+$maximum      = 6; // i.e. Maximum number of digits to produce - i.e. up to d[1000000]
 $need_help    = FALSE;
 $grand_total  = 0;
 $show_ticks   = FALSE;
@@ -226,7 +234,7 @@ while ($ndx <= $maximum) {
         echo 'Checking (' . $ndx . ') for a solution.' . PHP_EOL;
     }
 
-    // Generate a solution
+    // Generate a solution for $maximum digits
     $solutions[$ndx] = find_solutions($ndx);
 
     if ($show_ticks && ($tally % 10 == 0)) {

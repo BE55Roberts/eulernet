@@ -1,29 +1,26 @@
 <?php
-// FILE: trial39.php
+// FILE: trial37.php
 // GOAL: To solve this puzzle
 
 /*
-If p is the perimeter of a right angle triangle with integral length sides, {a,b,c},
-there are exactly three solutions for p = 120.
+The number 3797 has an interesting property. Being prime itself, it is possible to continuously remove digits from left to right, and remain prime at each stage: 3797, 797, 97, and 7. Similarly we can work from right to left: 3797, 379, 37, and 3.
 
-{20,48,52}, {24,45,51}, {30,40,50}
+Find the sum of the only eleven primes that are both truncatable from left to right and right to left.
 
-For which value of p ≤ 1000, is the number of solutions maximised?
+NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes.
 
-NOTE: Pythagorean theorem holds: c^2 = a^2 + b^2
-ALSO: p = a + b + c AND p <= 1000
-Solution:
-  When p = 840, there are 16 tuples.
+LIST: 2, 3, 5, 7, 23, 37, 53, 73, 313, 317, 373, 797, 3137, 3797, 739397
+URL: https://en.wikipedia.org/wiki/Truncatable_prime
 */
 
 // START
-$dbg          = FALSE;
-$maximum      = 1000;
-$need_help    = FALSE;
-$grand_total  = 0;
-$show_ticks   = FALSE;
+$dbg         = FALSE;
+$maximum     = 800000;
+$need_help   = FALSE;
+$grand_total = 0;
+$show_ticks  = FALSE;
 $show_answers = FALSE;
-$solutions    = [0 => []];
+
 
 // HELP:
 if ($argc > 1) {
@@ -37,11 +34,11 @@ if ($argc > 1) {
                 break;
 
             case 'a':
-                $show_answers = TRUE;
+                $show_answers = true;
                 break;
 
             case 'm':
-                $maximum = (int)$value;
+                $maximum = $value;
                 break;
 
             case 's':
@@ -64,10 +61,10 @@ function show_help() {
     echo '      -h redisplays this Help Screen' . PHP_EOL;
     echo '      -m sets the $max value (inclusive)for the computation.' . PHP_EOL;
     echo '      -s shows tick marks every 100 trials.' . PHP_EOL;
-    echo 'PROB: The goal is to find the value p out of all integer right triangles' . PHP_EOL;
-    echo '      such that we produce the highest number of tuples {a,b,c}' . PHP_EOL;
-    echo '      where p <= $max AND p = a + b + c AND a <= b < c AND' . PHP_EOL;
-    echo '      p has the highest number of solutions.' . PHP_EOL;
+    echo 'PROB: The goal is to find the sum of all primes up to $max' . PHP_EOL;
+    echo '      that are truncatable primes - i.e. truncating digits' . PHP_EOL;
+    echo '      from either the LEFT or RIGHT result in numbers that ' . PHP_EOL;
+    echo '      are themselves PRIME NUMBERS.' . PHP_EOL;
 }
 
 /**
@@ -155,60 +152,35 @@ function is_palindrome($val = '') {
  */
 function matches_criteria($val = FALSE) {
     $matched     = TRUE;
-    $as_a_string = (string) $val;
+    $as_a_string = (string)$val;
 
     if (is_prime($as_a_string) === FALSE) {
         return FALSE;
     }
 
     if (strlen($val) == 1) {
-        if (in_array($val, [2, 3, 5, 7])) {
+        if (in_array($val, [2,3,5,7])) {
             return TRUE;
-        }
-        else {
+        } else {
             return FALSE;
         }
     }
 
     // Check left
     $truncated_left = substr($as_a_string, 1);
-    $matched        = matches_criteria($truncated_left);
+    $matched = matches_criteria($truncated_left);
     if ($matched === FALSE) {
         return $matched;
     }
 
     // Check right
     $truncated_left = substr($as_a_string, 0, -1);
-    $matched        = matches_criteria($truncated_left);
+    $matched = matches_criteria($truncated_left);
     if ($matched === FALSE) {
         return $matched;
     }
 
     return $matched;
-}
-
-/**
- * Find the solution for a given argument
- *
- * @param int $p is the perimeter value to inspect
- */
-function find_solutions($p = 1) {
-    global $dbg;
-    $tuples = [];
-    $half   = floor($p / 2);
-    if ($dbg) {
-        echo '# Checking p(' . $p . ') for tuple solutions...' . PHP_EOL;
-    }
-    for ($a = 0; $a < $half; $a++) {
-        for ($b = 0; $b < $half; $b++) {
-            $c = sqrt($a * $a + $b * $b);
-            if (($p == $a + $b + $c) && ($c == floor($c))) {
-                $tuples[] = [$a, $b, $c];
-            }
-        }
-    }
-
-    return $tuples;
 }
 
 // MAIN
@@ -223,36 +195,37 @@ $tally = 0;
 
 while ($ndx <= $maximum) {
     if ($dbg) {
-        echo 'Checking (' . $ndx . ') for a solution.' . PHP_EOL;
+        echo 'Checking (' . $ndx . ') against criteria.' . PHP_EOL;
     }
 
-    // Generate a solution
-    $solutions[$ndx] = find_solutions($ndx);
+    // Skip all values ending in '5', since the can not be prime numbers
+    if ($ndx % 5 !== 0) {
+        // Check to see if the index value matches the criteria
+        if (matches_criteria($ndx) == TRUE) {
+            $grand_total += $ndx;
+            if ($dbg) {
+                echo PHP_EOL.$ndx.'--> Is a TRUNCATABLE PRIME.' . PHP_EOL;
+            }
+            if ($show_answers) {
+                echo PHP_EOL.$ndx.' IS a TRUNCATABLE PRIME.' . PHP_EOL;
+            }
+        }
+    }
 
-    if ($show_ticks && ($tally % 10 == 0)) {
+    if ($show_ticks && ($tally % 100 == 0)) {
         echo '.';
         $tally = 0;
     }
 
-    // Bump the index by 1 until we hit the maximum (inclusively)
-    $ndx++;
+    // Bump the index by 2 until we hit the maximum
+    $ndx += 2;
     $tally++;
 }
 
-// Identify the best solution
-$solution = 0;
-for ($i = $first; $i <= $maximum; $i++) {
-    if (count($solutions[$i]) > $solution) {
-        $solution = $i;
-    }
-}
 // Summarize
 if ($show_ticks || $dbg) {
     echo PHP_EOL; // Start a new line
 }
-echo 'SOLUTION: ' . 'Using p of [' . $solution . '] produces the maximum [' . count($solutions[$solution]) . '] tuples.' . PHP_EOL;
-if ($dbg) {
-    echo '# SOLUTION DETAILS: ' . print_r($solutions[$solution], true) . '' . PHP_EOL;
-}
+echo 'SOLUTION: '.'SUM is ['.$grand_total.'] for numbers 1..'.$maximum.PHP_EOL;
 exit(0);
 

@@ -1,6 +1,6 @@
 <?php
-// FILE: trial.php
-// GOAL: To solve this puzzle
+// FILE: trial4.php
+// GOAL: Find the largest palindrome made from the product of two 3-digit numbers
 
 // START
 $dbg = false;
@@ -30,6 +30,10 @@ if ($argc > 1) {
                 echo 'PARM: -d indicates we are debugging'.PHP_EOL;
                 echo '      -h redisplays this Help Screen'.PHP_EOL;
                 echo '      -m sets the $max value for the calculation.'.PHP_EOL;
+                echo 'A palindromic number reads the same both ways. '.PHP_EOL;
+                echo 'The largest palindrome made from the product of '.PHP_EOL;
+                echo 'two 2-digit numbers is 9009 = 91 × 99.'.PHP_EOL;
+                echo 'Find the largest palindrome made from the product of two 3-digit numbers.'.PHP_EOL;
                 exit(0);
                 break;
         }

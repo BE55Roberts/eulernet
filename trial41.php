@@ -10,6 +10,8 @@ $first_to_check = 2;
 $maximum = 9;
 $tally = 0;
 $count = 0;
+$solution = false;
+$ndx = 0;
 
 // HELP:
 if ($argc > 1) {
@@ -115,7 +117,34 @@ function find_triangular_sum($val = 1) {
 
 }
 
-// Is it a Pan Digital Prime
+/**
+ * Check to be sure the $value is pan digital
+ * A Pan Digital number uses all unique digits. This checks using array unique.
+ * @param int $value for the number to check
+ *
+ * @return bool $is_it is TRUE if the number is pan digital, FALSE otherwise
+ */
+function is_pan_digital($value = 1) {
+    global $dbg;
+    $is_it = false;
+
+    $digits = str_split($value, 1);
+    if ($dbg) { echo '# '.$value.' SPLIT:'.implode(',', $digits).PHP_EOL; }
+
+    $uniquely = array_unique($digits);
+    if (count($digits) == count($uniquely)) {
+        $is_it = true;
+    }
+
+    return $is_it;
+}
+
+/**
+ * Is it a Pan Digital Prime
+ * @param int $value is the number to check
+ *
+ * @return bool is TRUE if the number is a Prime, FALSE otherwise
+ */
 function is_pan_digital_prime($value = 1) {
     global $dbg;
     $yes_it_is = false;
@@ -127,7 +156,13 @@ function is_pan_digital_prime($value = 1) {
 }
 
 
-// Find next number to test
+/**
+ * Find the next sequential number in the series 1..N of length $length
+ * @param int $previous is the previous number in the series
+ * @param int $length is the length of the number within the range
+ *
+ * @return bool|int $next_number or FALSE if there are no more
+ */
 function find_next_number($previous = 1, $length = 9) {
     global $dbg;
     $not_pan_digital = true;
@@ -140,11 +175,13 @@ function find_next_number($previous = 1, $length = 9) {
         if ($dbg) { echo '# '.$next_number.' SPLIT:'.implode(',', $digits).PHP_EOL; }
 
         sort($digits);
-        if (count($digits) == count(array_unique($digits))) {
+        $uniquely = array_unique($digits);
+        if (count($digits) == count($uniquely)) {
             $not_pan_digital = false;
+        } else {
+            $next_number++;
         }
         if ($dbg) { echo '# OBSERVATION:'.($not_pan_digital ? 'T' : 'F').PHP_EOL; }
-        $next_number++; 
 
     } while ($next_number < $limit && $not_pan_digital);
 
@@ -152,48 +189,105 @@ function find_next_number($previous = 1, $length = 9) {
 }
 
 
+/**
+ * Generate the next permutation in a series
+ * @param $p is the array to permute - e.g. {1, 2, 3, 4}
+ * @param $size is the size of the array - e.g. 4
+ *
+ * @return array $p is the next sequence of elements from $p OR FALSE at end
+ */
+function generate_next_permutation($p, $size) {
+    global $dbg;
+
+    if ($dbg) { echo '# P:['.implode(', ', $p).'] of size '.$size.PHP_EOL;}
+
+    // Slide down the array looking for where we're smaller than the next guy
+    for ($i = $size - 1; ($i > 0) && ($p[$i] >= $p[$i+1]); --$i) { }
+
+    // If this does not occur, then we have finished our permutations
+    // and the array is reversed - e.g. (1, 2, 3, 4) => (4, 3, 2, 1)
+    if ($i == -1) { return false; }
+
+    // Slide down the array looking for a bigger number than what we found before
+    for ($j = $size; ($j > 0) && ($p[$j] <= $p[$i]); --$j) { }
+
+    // swap them
+    $tmp = $p[$i]; $p[$i] = $p[$j]; $p[$j] = $tmp;
+
+    // Finally, reverse the elements in between by swapping the ends
+    for (++$i, $j = $size; $i < $j; ++$i, --$j) {
+        $tmp = $p[$i]; $p[$i] = $p[$j]; $p[$j] = $tmp;
+    }
+
+    return $p;
+}
 
 /////////////////////////////   MAIN   /////////////////////////////
-// $starting = microtime(true);
-// $first_to_check = 2;
-// $maximum = 10;
-
+// $maximum = 9;
 
 echo PHP_EOL;
-$to_check = 10**($maximum-1);
-$last_to_check = 10**$maximum - 1;
-$solution = false;
+$digits = range(0, $maximum -1 );
+$ending_digits = array_reverse($digits);
+$labels = range(1, $maximum);
 
-if ($dbg) {
-    echo 'Running amicable numbers '.$first_to_check.' through('.$maximum.')'.PHP_EOL;
-}
+// pc_permute($digits);
+// generate_permute($digits, $resulted);
+$resulted = [];
+$ndx = 0;
 
+// Cycle through all permutations
+do {
+    $resulted[$ndx] = '';
+    foreach ($digits as $i) {
+        $resulted[$ndx] .= $labels[$i];
+    }
 
-// Find the Abundant numbers
-while ($to_check < $last_to_check && !$solution) {
+    $resulted[$ndx] = (int)$resulted[$ndx];
     if ($dbg) {
-        echo 'Testing('.$to_check.') '.'for pan digital prime...'.PHP_EOL;
+        echo 'Testing('.$resulted[$ndx] .') '.'for pan digital prime...'.PHP_EOL;
     }
 
-    $solution_found = is_pan_digital_prime($to_check);
-    if ($solution_found) {
-        $solution = $to_check;
-    } else {
-        $to_check = find_next_number($to_check, $maximum);
+    $panness = is_pan_digital($resulted[$ndx] );
+    if ($panness) {
+        if ($dbg) {
+            echo '# Value '.$resulted[$ndx] .' is Pan Digital - checking primeness...'.PHP_EOL;
+        }
+        $solution_found = is_prime($resulted[$ndx] );
+        if ($solution_found && $resulted[$ndx] > $solution) {
+            $solution = $resulted[$ndx] ;
+            if ($dbg) {
+                echo '# Found a Solution ['.$resulted[$ndx] .'] is Pan Digital AND Prime'.PHP_EOL;
+            }
+        }
     }
 
-    // Increment values
+    // Increment values and index
     $tally++;
+    if ($show && ($tally % 10 == 0)) {echo '.';}
 
-    if ($tally % 100 == 0) {echo '.';}
+    $digits = generate_next_permutation($digits, $maximum - 1);
+    if ($digits == $ending_digits) {
+        $digits = false;
+    }
+} while ($digits && ++$ndx);
+
+
+
+# Evaluate solution and display result
+if ($show) {
+    echo PHP_EOL;
 }
-
-
-
+if ($solution) {
+    echo 'SOLUTION: ' . $solution . PHP_EOL;
+} else {
+    echo '*** NO SOLUTION FOUND ***'.PHP_EOL;
+}
 
 # Evaluate timing
 $finished = microtime(true);
 $elapsed = $finished - $starting;
-echo 'TIMING: This job took '.$elapsed.' seconds to run'.$tally.' iterations.'.PHP_EOL;
+if ($show) {
+    echo 'TIMING: This job took '.$elapsed.' seconds to run '.$tally.' iterations.'.PHP_EOL;
+}
 exit(0);
 
